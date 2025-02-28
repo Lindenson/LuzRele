@@ -1,0 +1,57 @@
+# STM32CubeIDE specific
+.cproject
+.project
+.settings/
+*.launch
+*.svd
+
+# CubeMX generated files
+MXProject.log
+STM32CubeMX.log
+*.ioc
+
+# Build output
+/Debug/
+/Release/
+*.elf
+*.bin
+*.hex
+*.map
+*.lst
+*.o
+*.d
+*.a
+*.axf
+*.dep
+*.su
+*.o.d
+*.suo
+*.bak
+
+# Makefile and build artifacts
+Makefile
+makefile
+*.mk
+
+# Logs
+*.log
+
+# User-specific files
+*.sdf
+*.layout
+*.suo
+*.ccls-cache/
+*.vscode/
+
+# Other IDE temporary files
+*.swp
+*.swo
+*.swd
+*.dwt
+*.trace
+
+# Ignore CubeIDE auto-generated folders
+/.metadata/
+/.recovery/
+/.temp/
+
