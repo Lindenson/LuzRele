@@ -3,7 +3,7 @@
 #include <buttons.h>
 #include <menu.h>
 
-volatile MenuSettings settings = {
+volatile menu_settings_t settings = {
     .device_state = 0,
     .timer_duration = 15,
     .melody_state = 0,
@@ -22,7 +22,7 @@ void action_melody_off() { settings.melody_state = 0; }
 void action_night_on()   { settings.night_mode_state = 1; }
 void action_night_off()  { settings.night_mode_state = 0; }
 void action_level_5()  { settings.night_mode_level = 1; }
-void action_level_10()   { settings.night_mode_level = 5; }
+void action_level_10()   { settings.night_mode_level = 4; }
 void action_level_30()   { settings.night_mode_level = 10; }
 void action_show_options() {settingsShown = 1; showOptions();}
 
@@ -48,7 +48,7 @@ MenuItem menu_device_on  = {"On", &menu_device, NULL, NULL, NULL, action_on};
 MenuItem menu_device_off = {"Off", &menu_device, NULL, &menu_device_on, NULL, action_off};
 
 MenuItem menu_timer_30s = {"15s", &menu_timer, NULL, NULL, NULL, action_30s};
-MenuItem menu_timer_1m  = {"30", &menu_timer, NULL, &menu_timer_30s, NULL, action_1m};
+MenuItem menu_timer_1m  = {"30s", &menu_timer, NULL, &menu_timer_30s, NULL, action_1m};
 MenuItem menu_timer_2m  = {"1m", &menu_timer, NULL, &menu_timer_1m, NULL, action_2m};
 
 MenuItem menu_melody_on  = {"On", &menu_melody, NULL, NULL, NULL, action_melody_on};
@@ -93,10 +93,12 @@ void Setup_menu() {
     menu_level_10.next = &menu_level_30;
 
     currentMenu = &menu_welcome;
-    screenMessage(currentMenu->name);
+    screen_message(currentMenu->name);
 }
 
-void handle_button(ButtonID_t btn) {
+void handle_button(button_id_t btn) {
+	if (!btn) return;
+
 	volatile MenuItem *lastMenu = currentMenu;
 	settingsShown = 0;
     switch (btn) {
@@ -141,5 +143,10 @@ void handle_button(ButtonID_t btn) {
 }
 
 void currentMenuScreen(){
-    screenMessage(currentMenu->name);
+    screen_message(currentMenu->name);
+}
+
+void main_menu(){
+	currentMenu = &menu_welcome;
+    screen_message(currentMenu->name);
 }

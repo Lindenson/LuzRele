@@ -9,7 +9,7 @@ typedef enum {
     BUTTON_DOWN,
     BUTTON_OK,
     BUTTON_CANCEL,
-} ButtonID_t;
+} button_id_t;
 
 
 typedef struct {
@@ -17,10 +17,10 @@ typedef struct {
     uint8_t down;
     uint8_t ok;
     uint8_t cancel;
-} ButtonState_t;
+} button_state_t;
 
-extern volatile ButtonState_t buttons;
+extern volatile button_state_t buttons;
 extern volatile uint8_t debounce_flag;
-extern volatile ButtonID_t last_button;
+extern volatile button_id_t last_button;
 
 #endif

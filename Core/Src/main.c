@@ -26,15 +26,14 @@
 #include "ssd1306.h"
 #include "ssd1306_fonts.h"
 #include "buttons.h"
-#include "melody.h"
 #include "menu.h"
 #include "screen.h"
-#include "songs.h"
 #include "state.h"
 #include "logic.h"
 #include "bh1750.h"
+#include "melody.h"
 
-#define WAIT_3_SEC 3
+#define MENU_TIMEOUT_SEC 3
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -61,8 +60,8 @@ TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 
 /* USER CODE BEGIN PV */
-volatile ButtonState_t buttons = { 0 };
-volatile SystemState system_state = {BUTTON_NONE, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+volatile system_state_t system_state = {BUTTON_NONE, 0, 0, 0, 0, 0, 0, NONE, OFF, IN_PROCESS, MENU};
+volatile button_state_t buttons = { 0 };
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -79,12 +78,12 @@ static void MX_I2C2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-int isNotDark(){
-	if (!settings.night_mode_state) return 0;
-	float Result;
-	BH1750_ReadLight(&Result);
-	int Result_I = Result * 10;
-	return Result_I > settings.night_mode_level;
+int is_dark(){
+	if (!settings.night_mode_state) return 1;
+	float light_measured;
+	BH1750_ReadLight(&light_measured);
+	int light_measured_int = light_measured * 10;
+	return light_measured_int < settings.night_mode_level;
 }
 
 void stop_timer() {
@@ -98,34 +97,16 @@ void start_timer() {
 }
 
 void start_relay() {
-	if (system_state.relay_on) return;
-	system_state.relay_on = 1;
 	HAL_GPIO_WritePin(Relay_GPIO_Port, Relay_Pin, GPIO_PIN_SET);
 }
 
 void stop_relay() {
-	if (!system_state.relay_on  || settings.device_state) return;
-	system_state.relay_on = 0;
 	HAL_GPIO_WritePin(Relay_GPIO_Port, Relay_Pin, GPIO_PIN_RESET);
-}
-
-void start_melody() {
-    if (settings.melody_state) {
-        system_state.melody_number ^= 1;
-        play_melody(melodies[system_state.melody_number]);
-    }
-}
-
-void start_timed_relay() {
-	if (system_state.relay_on || isNotDark()) return;
-	start_relay();
-	screenMessage("Welcome");
-	system_state.welcome_mode = 1;
-	start_melody();
 }
 
 void stop_timed_relay() {
 	system_state.time_counter_sec = 0;
+	system_state.relay_state = OFF;
 	stop_relay();
 }
 
@@ -136,10 +117,9 @@ void cleanButtonFlags(){
 }
 
 void return_menu() {
-	if (system_state.welcome_mode++ > WAIT_3_SEC) {
-		system_state.welcome_mode = 0;
-		currentMenuScreen();
-	}
+	if (system_state.menu_update_counter++ < MENU_TIMEOUT_SEC) return;
+	system_state.menu_update_counter = 0;
+	system_state.screen_state = MENU;
 }
 /* USER CODE END 0 */
 
@@ -555,19 +535,20 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 				&& HAL_GPIO_ReadPin(Cancel_GPIO_Port, Cancel_Pin)
 						== GPIO_PIN_RESET)
 			buttons.cancel = 1;
+
 		else if (system_state.small_move && HAL_GPIO_ReadPin(MOVE_SENSOR_GPIO_Port, MOVE_SENSOR_Pin) == GPIO_PIN_SET)
 			system_state.detected_move = 1;
 
-		if (system_state.last_button) stop_playing();
 		cleanButtonFlags();
+		if (system_state.last_button) stop_playing(&system_state);
 	}
 
 	if (htim->Instance == TIM4 && !system_state.detected_move) {
-		return_menu();
 		if (system_state.time_counter_sec++ >= settings.timer_duration) {
 			HAL_TIM_Base_Stop_IT(&htim4);
 			stop_timed_relay();
 		};
+		return_menu();
 	}
 }
 /* USER CODE END 4 */

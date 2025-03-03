@@ -5,7 +5,7 @@
 #include "menu.h"
 #include <stdio.h>
 
-void screenMessage(const char *message) {
+void screen_message(const char *message) {
 	ssd1306_Fill(Black);
 	ssd1306_SetCursor(15, 10);
 	ssd1306_WriteString((char *)message, Font_11x18, White);

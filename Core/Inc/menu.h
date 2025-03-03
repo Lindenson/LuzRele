@@ -9,12 +9,13 @@ typedef struct {
     int melody_state;
     int night_mode_state;
     int night_mode_level;
-} MenuSettings;
+} menu_settings_t;
 
-extern volatile MenuSettings settings;
+extern volatile menu_settings_t settings;
 
-void handle_button(ButtonID_t btn);
 void Setup_menu();
+void handle_button(button_id_t btn);
 void currentMenuScreen();
+void main_menu();
 
 #endif /* INC_MENU_H_ */

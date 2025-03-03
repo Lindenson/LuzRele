@@ -68,18 +68,14 @@ void Sound_init() {
 }
 
 
-void play_melody(Melody melody) {
-    system_state.stop_playing = 0;
+void play_melody(Melody melody, volatile system_state_t* system_state) {
     for (size_t i = 0; i < melody.length; i++) {
-        if (system_state.stop_playing) {
-            stop_playing();
-            return;
-        }
+        if (system_state->music_state == STOP) return;
         play_note(melody.notes[i].frequency, melody.notes[i].duration, melody.name, i > 0);
     }
 }
 
-void stop_playing() {
-    system_state.stop_playing = 1;
+void stop_playing(volatile system_state_t* system_state) {
+	system_state->music_state = STOP;
     __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 0);
 }
