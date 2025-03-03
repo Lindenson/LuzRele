@@ -5,6 +5,7 @@
 #include "math.h"
 #include "ssd1306.h"
 #include "ssd1306_fonts.h"
+#include "state.h"
 
 #define TIMER_CLOCK 84000000U
 #define PRESCALER 999U
@@ -36,7 +37,7 @@ typedef struct {
 } Melody;
 
 void Sound_init();
-void play_melody(Melody melody);
-void stop_playing();
+void play_melody(Melody melody, SystemState system_state);
+void stop_playing(SystemState system_state);
 
 #endif // MELODY_H
