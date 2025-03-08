@@ -19,8 +19,4 @@ typedef struct {
     uint8_t cancel;
 } button_state_t;
 
-extern volatile button_state_t buttons;
-extern volatile uint8_t debounce_flag;
-extern volatile button_id_t last_button;
-
 #endif

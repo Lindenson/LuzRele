@@ -60,8 +60,15 @@ TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 
 /* USER CODE BEGIN PV */
-volatile system_state_t system_state = {BUTTON_NONE, 0, 0, 0, 0, 0, 0, NONE, OFF, IN_PROCESS, MENU};
-volatile button_state_t buttons = { 0 };
+volatile menu_settings_t menu_settings = {
+    .device_state = 0,
+	.melody_state = 0,
+	.night_mode_state = 1,
+	.night_mode_level = 1,
+    .timer_duration = 15
+};
+volatile system_state_t system_state = { 0 };
+volatile button_state_t menu_buttons = { 0 };
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -79,11 +86,11 @@ static void MX_I2C2_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 int is_dark(){
-	if (!settings.night_mode_state) return 1;
+	if (!menu_settings.night_mode_state) return 1;
 	float light_measured;
 	BH1750_ReadLight(&light_measured);
 	int light_measured_int = light_measured * 10;
-	return light_measured_int < settings.night_mode_level;
+	return light_measured_int < menu_settings.night_mode_level;
 }
 
 void stop_timer() {
@@ -106,20 +113,20 @@ void stop_relay() {
 
 void stop_timed_relay() {
 	system_state.time_counter_sec = 0;
-	system_state.relay_state = OFF;
 	stop_relay();
+	system_state.relay_state = OFF;
 }
 
-void cleanButtonFlags(){
+void clean_debounce_flags(){
 	system_state.last_button = BUTTON_NONE;
 	system_state.small_move = 0;
 	system_state.debounce_flag = 0;
 }
 
-void return_menu() {
+void return_to_menu_after_delay() {
 	if (system_state.menu_update_counter++ < MENU_TIMEOUT_SEC) return;
 	system_state.menu_update_counter = 0;
-	system_state.screen_state = MENU;
+	if (system_state.screen_state == WAITING_WELCOME) system_state.screen_state = MENU;
 }
 /* USER CODE END 0 */
 
@@ -159,16 +166,16 @@ int main(void)
   MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
   ssd1306_Init();
-  Setup_menu();
+  setup_menu(&menu_settings);
   BH1750_Init(&hi2c2);
   BH1750_SetMode(CONTINUOUS_HIGH_RES_MODE);
-  Sound_init();
+  sound_init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	while (1) {
-		logic(&settings, &system_state, &buttons);
+		logic(&menu_settings, &system_state, &menu_buttons);
 	}
 
     /* USER CODE END WHILE */
@@ -524,31 +531,30 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
 		if (system_state.last_button == BUTTON_UP
 				&& HAL_GPIO_ReadPin(Up_GPIO_Port, Up_Pin) == GPIO_PIN_RESET)
-			buttons.up = 1;
+			menu_buttons.up = 1;
 		else if (system_state.last_button == BUTTON_DOWN
 				&& HAL_GPIO_ReadPin(Down_GPIO_Port, Down_Pin) == GPIO_PIN_RESET)
-			buttons.down = 1;
+			menu_buttons.down = 1;
 		else if (system_state.last_button == BUTTON_OK
 				&& HAL_GPIO_ReadPin(OK_GPIO_Port, OK_Pin) == GPIO_PIN_RESET)
-			buttons.ok = 1;
+			menu_buttons.ok = 1;
 		else if (system_state.last_button == BUTTON_CANCEL
 				&& HAL_GPIO_ReadPin(Cancel_GPIO_Port, Cancel_Pin)
 						== GPIO_PIN_RESET)
-			buttons.cancel = 1;
-
+			menu_buttons.cancel = 1;
 		else if (system_state.small_move && HAL_GPIO_ReadPin(MOVE_SENSOR_GPIO_Port, MOVE_SENSOR_Pin) == GPIO_PIN_SET)
-			system_state.detected_move = 1;
+					system_state.detected_move = 1;
 
-		cleanButtonFlags();
-		if (system_state.last_button) stop_playing(&system_state);
+		clean_debounce_flags();
+		if (menu_buttons.up || menu_buttons.down || menu_buttons.ok || menu_buttons.cancel) stop_playing(&system_state);
 	}
 
 	if (htim->Instance == TIM4 && !system_state.detected_move) {
-		if (system_state.time_counter_sec++ >= settings.timer_duration) {
+		if (system_state.time_counter_sec++ >= menu_settings.timer_duration) {
 			HAL_TIM_Base_Stop_IT(&htim4);
 			stop_timed_relay();
 		};
-		return_menu();
+		return_to_menu_after_delay();
 	}
 }
 /* USER CODE END 4 */

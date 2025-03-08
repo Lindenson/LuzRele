@@ -1,14 +1,14 @@
 #ifndef MELODY_H
 #define MELODY_H
 
-#include "stdint.h"
-#include "math.h"
-#include "ssd1306.h"
-#include "ssd1306_fonts.h"
-#include "state.h"
+#include <stdint.h>
+#include <state.h>
+#include <screen.h>
 
 #define TIMER_CLOCK 84000000U
 #define PRESCALER 999U
+
+extern TIM_HandleTypeDef htim2;
 
 typedef enum {
 	FREQ_C = 261,
@@ -22,7 +22,7 @@ typedef enum {
 	FREQ_A = 440,
 	FREQ_Bb = 466,
 	FREQ_B = 493,
-	FREQ_Z = 0  // Пауза
+	FREQ_Z = 0
 } NoteFrequency;
 
 typedef struct {
@@ -36,7 +36,7 @@ typedef struct {
 	const int length;
 } Melody;
 
-void Sound_init();
+void sound_init();
 void play_melody(Melody melody, volatile system_state_t* system_state);
 void stop_playing(volatile system_state_t* system_state);
 

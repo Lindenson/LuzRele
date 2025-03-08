@@ -1,31 +1,32 @@
 #ifndef INC_STATE_H_
 #define INC_STATE_H_
-#include "buttons.h"
+#include <buttons.h>
 
 
 typedef enum {
-	NONE,
+	NONE = 0,
     TIMER_ON,
     TUMBLER_OFF,
     TUMBLER_ON,
 } event_t;
 
 typedef enum {
-	OFF,
+	OFF = 0,
     ON_TIMER,
     ON_TUMBLER,
 } relay_state_t;
 
 typedef enum {
+	IDLE  = 0,
+	STOP,
     PLAY,
-	IN_PROCESS,
-    STOP,
 } music_state_t;
 
 typedef enum {
-    WAITING,
-	MENU,
+	MENU = 0,
+    WAITING_MENU,
     WELCOME,
+	WAITING_WELCOME,
 } screen_state_t;
 
 typedef struct {

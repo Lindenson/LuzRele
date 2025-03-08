@@ -1,6 +1,7 @@
 #include "songs.h"
 
-const Note yesterday[] = { { FREQ_Z, 500 }, { FREQ_G, 500 }, { FREQ_F, 250 }, { FREQ_F, 500 },
+const Note yesterday[] = { { FREQ_Z, 700 },
+	{ FREQ_G, 500 }, { FREQ_F, 250 }, { FREQ_F, 500 },
 	{ FREQ_Z, 250 }, { FREQ_A, 175 }, { FREQ_B, 175 }, { FREQ_CS, 175 },
 	{ FREQ_D, 175 }, { FREQ_E, 175 }, { FREQ_F, 175 }, { FREQ_E, 250 },
 	{ FREQ_D, 250 }, { FREQ_D, 500 }, { FREQ_Z, 250 }, { FREQ_D, 175 },
@@ -8,9 +9,10 @@ const Note yesterday[] = { { FREQ_Z, 500 }, { FREQ_G, 500 }, { FREQ_F, 250 }, { 
 	{ FREQ_G, 175 }, { FREQ_Bb, 250 }, { FREQ_A, 250 }, { FREQ_A, 250 },
 	{ FREQ_Z, 500 }, { FREQ_G, 250 }, { FREQ_F, 250 }, { FREQ_A, 250 },
 	{ FREQ_G, 500 }, { FREQ_D, 175 }, { FREQ_F, 350 }, { FREQ_A, 250 },
-	{ FREQ_A, 500 }, { FREQ_Z, 500 } };
+	{ FREQ_A, 500 }, { FREQ_Z, 2000 } };
 
-const Note sweet_dreams[] = { { FREQ_Z, 500 }, { FREQ_F, 200 }, { FREQ_F, 250 }, { FREQ_D, 200 },
+const Note sweet_dreams[] = { { FREQ_Z, 700 },
+	{ FREQ_F, 200 }, { FREQ_F, 250 }, { FREQ_D, 200 },
 	{ FREQ_F, 200 }, { FREQ_F, 200 }, { FREQ_F, 90 }, { FREQ_E, 150 },
 	{ FREQ_Z, 300 }, { FREQ_F, 180 }, { FREQ_F, 90 }, { FREQ_D, 90 },
 	{ FREQ_F, 200 }, { FREQ_D, 200 }, { FREQ_F, 220 }, { FREQ_G, 200 },

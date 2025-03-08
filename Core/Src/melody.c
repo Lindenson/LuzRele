@@ -1,26 +1,9 @@
-#include "main.h"
-#include "melody.h"
-#include "songs.h"
-#include "state.h"
+#include <melody.h>
 
-
-extern TIM_HandleTypeDef htim2;
 volatile uint8_t phase;
 
 static inline uint16_t get_ARR(uint16_t freq) {
 	return (TIMER_CLOCK / (PRESCALER + 1)) / freq - 1;
-}
-
-void draw_waveform(uint16_t freq, char *name) {
-	ssd1306_Fill(Black);
-	ssd1306_SetCursor(0, 10);
-	ssd1306_WriteString(name, Font_11x18, White);
-
-	for (int x = 0; x < 128; x++) {
-		int y = 50 + (int) (12 * sin((x + phase) * freq * 0.0005));
-		ssd1306_DrawPixel(x, y, White);
-	}
-	ssd1306_UpdateScreen();
 }
 
 void play_note(uint16_t freq, uint16_t duration, const char *name, int withWave) {
@@ -31,14 +14,14 @@ void play_note(uint16_t freq, uint16_t duration, const char *name, int withWave)
 	} else {
 		__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 0);
 	}
-	if (withWave) draw_waveform(freq, (char*) name);
+	if (withWave) draw_waveform(freq, (char*) name, phase);
 	phase += duration / 8;
 	HAL_Delay(duration);
 	__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 0);
 	HAL_Delay(100);
 }
 
-void Sound_init() {
+void sound_init() {
 	__HAL_RCC_TIM2_CLK_ENABLE();
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 
@@ -64,15 +47,16 @@ void Sound_init() {
 	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
 	HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_1);
 	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
-	play_note(FREQ_Z, 10, "", 0);
+	play_note(FREQ_Z, 100, "", 0);
 }
 
 
 void play_melody(Melody melody, volatile system_state_t* system_state) {
     for (size_t i = 0; i < melody.length; i++) {
-        if (system_state->music_state == STOP) return;
+        if (system_state->music_state == STOP) break;
         play_note(melody.notes[i].frequency, melody.notes[i].duration, melody.name, i > 0);
     }
+    system_state->music_state = IDLE;
 }
 
 void stop_playing(volatile system_state_t* system_state) {
