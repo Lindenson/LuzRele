@@ -17,6 +17,10 @@ extern void stop_relay();
 extern void stop_melody();
 extern int is_dark();
 
-void logic(volatile menu_settings_t* settings, volatile system_state_t* system_state, volatile button_state_t* buttons);
+#define MENU_TIMEOUT_SEC 3
+
+void event_logic(volatile menu_settings_t* settings, volatile system_state_t* system_state, volatile button_state_t* buttons);
+void stop_timed_relay(volatile system_state_t* system_state);
+void return_to_menu_after_delay(volatile system_state_t* system_state);
 
 #endif /* INC_LOGIC_H_ */

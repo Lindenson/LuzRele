@@ -25,15 +25,15 @@
 #include "string.h"
 #include "ssd1306.h"
 #include "ssd1306_fonts.h"
-#include "buttons.h"
 #include "menu.h"
 #include "screen.h"
 #include "state.h"
 #include "logic.h"
 #include "bh1750.h"
 #include "melody.h"
+#include "buttons.h"
+#include "button_handler.h"
 
-#define MENU_TIMEOUT_SEC 3
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -85,6 +85,7 @@ static void MX_I2C2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+//peripherals
 int is_dark(){
 	if (!menu_settings.night_mode_state) return 1;
 	float light_measured;
@@ -109,24 +110,6 @@ void start_relay() {
 
 void stop_relay() {
 	HAL_GPIO_WritePin(Relay_GPIO_Port, Relay_Pin, GPIO_PIN_RESET);
-}
-
-void stop_timed_relay() {
-	system_state.time_counter_sec = 0;
-	stop_relay();
-	system_state.relay_state = OFF;
-}
-
-void clean_debounce_flags(){
-	system_state.last_button = BUTTON_NONE;
-	system_state.small_move = 0;
-	system_state.debounce_flag = 0;
-}
-
-void return_to_menu_after_delay() {
-	if (system_state.menu_update_counter++ < MENU_TIMEOUT_SEC) return;
-	system_state.menu_update_counter = 0;
-	if (system_state.screen_state == WAITING_WELCOME) system_state.screen_state = MENU;
 }
 /* USER CODE END 0 */
 
@@ -175,7 +158,7 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	while (1) {
-		logic(&menu_settings, &system_state, &menu_buttons);
+		event_logic(&menu_settings, &system_state, &menu_buttons);
 	}
 
     /* USER CODE END WHILE */
@@ -545,16 +528,16 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 		else if (system_state.small_move && HAL_GPIO_ReadPin(MOVE_SENSOR_GPIO_Port, MOVE_SENSOR_Pin) == GPIO_PIN_SET)
 					system_state.detected_move = 1;
 
-		clean_debounce_flags();
+		clean_debounce_flags(&system_state);
 		if (menu_buttons.up || menu_buttons.down || menu_buttons.ok || menu_buttons.cancel) stop_playing(&system_state);
 	}
 
 	if (htim->Instance == TIM4 && !system_state.detected_move) {
 		if (system_state.time_counter_sec++ >= menu_settings.timer_duration) {
 			HAL_TIM_Base_Stop_IT(&htim4);
-			stop_timed_relay();
+			stop_timed_relay(&system_state);
 		};
-		return_to_menu_after_delay();
+		return_to_menu_after_delay(&system_state);
 	}
 }
 /* USER CODE END 4 */

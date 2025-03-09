@@ -19,9 +19,11 @@ Este proyecto implementa un **sistema de control de luz** basado en un **STM32 F
 - Fuente de alimentación adecuada  
 
 ## 🔧 Instalación  
-1. Clona este repositorio:  
-   ```sh
-   git clone https://github.com/tu-usuario/tu-repositorio.git
+```sh
+	git clone https://github.com/Lindenson/LuzSensor.git
+	cd LuzSensor
+	st-flash --format elf write firmware.elf
+```
 
 
 ## Máquina de Estados y Lógica de Funcionamiento
@@ -40,14 +42,17 @@ El sistema determina el evento actual en función del estado del dispositivo y l
 3. **TUMBLER_OFF** – Si el dispositivo está apagado y no se detecta movimiento, el evento se establece en `TUMBLER_OFF`.
 
 ```c
-if (settings->device_state) {		
-	system_state.event = TUMBLER_ON;
-} 
-else if (state->detected_move) { 
-	system_state.event = TIMER_ON;
-}	
-else {
-	system_state.event = TUMBLER_OFF;
+// in an endless cycle
+{
+	handle_menu(detect_button_press(buttons, system_state));
+	
+	event_t event = settings->device_state? TUMBLER_ON : TUMBLER_OFF;
+	if (!event && is_dark() && system_state->detected_move) event = TIMER_ON;
+	system_state->detected_move &= ~1;
+	
+	handle_event(event, system_state);
+	update_music_state(system_state, settings);
+	update_screen_state(system_state);
 }
 ```
 
@@ -75,35 +80,31 @@ El sistema responde a los eventos controlando el relé, el temporizador y otros 
   - Si el relé ya estaba encendido debido a un evento de temporizador anterior, reinicia el temporizador.
 
 ```c
-void handle_event() {
-    switch (system_state.event) {
-        case TUMBLER_ON:
-            if (system_state.relay_state == OFF) {
-                system_state.relay_state = ON_TUMBLER;
-                stop_timer();
-                start_relay();
-            }
-        break;
-        case TUMBLER_OFF:
-            if (system_state.relay_state != OFF) {
-                system_state.relay_state = OFF;
-                if (system_state.relay_state == ON_TIMER) stop_timer();
-                stop_relay();
-            }
-        break;
-        case TIMER_ON:
-            if (system_state.relay_state == OFF) {
-                system_state.relay_state = ON_TIMER;
-                system_state.screen_state = WELCOME;
-                system_state.music_state = PLAY;
-                start_relay();
-                start_timer();
-            } else if (system_state.relay_state == ON_TIMER) {
-                start_timer();
-            }
-        break;
-        case NONE:
-        break;
+  switch (event) {
+	case TUMBLER_ON:
+	    if (system_state->relay_state == OFF) {
+	        stop_timer();
+	        start_relay();
+	        system_state->relay_state = ON_TUMBLER;
+	    }
+	break;
+	case TUMBLER_OFF:
+	    if (system_state->relay_state == ON_TUMBLER) {
+	        stop_relay();
+	        system_state->relay_state = OFF;
+	    }
+	break;
+	case TIMER_ON:
+		if (system_state->relay_state == OFF) {
+			start_relay();
+			start_timer();
+			system_state->relay_state = ON_TIMER;
+			system_state->screen_state = TO_WELCOME;
+			system_state->music_state = PLAY;
+		} else if (system_state->relay_state == ON_TIMER) {
+			start_timer();
+		}
+	break;
     }
 }
 ```

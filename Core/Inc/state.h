@@ -4,9 +4,8 @@
 
 
 typedef enum {
-	NONE = 0,
+	TURNED_OFF = 0,
     TIMER_ON,
-    TUMBLER_OFF,
     TUMBLER_ON,
 } event_t;
 
@@ -23,10 +22,10 @@ typedef enum {
 } music_state_t;
 
 typedef enum {
-	MENU = 0,
-    WAITING_MENU,
-    WELCOME,
-	WAITING_WELCOME,
+	TO_MENU = 0,
+    MENU,
+    TO_WELCOME,
+	WELCOME,
 } screen_state_t;
 
 typedef struct {
@@ -39,7 +38,6 @@ typedef struct {
     unsigned int melody_number;
     unsigned int menu_update_counter;
 
-    event_t event;
     relay_state_t relay_state;
     music_state_t music_state;
     screen_state_t screen_state;
