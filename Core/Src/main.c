@@ -126,7 +126,7 @@ void clean_debounce_flags(){
 void return_to_menu_after_delay() {
 	if (system_state.menu_update_counter++ < MENU_TIMEOUT_SEC) return;
 	system_state.menu_update_counter = 0;
-	if (system_state.screen_state == WAITING_WELCOME) system_state.screen_state = MENU;
+	if (system_state.screen_state == WELCOME) system_state.screen_state = TO_MENU;
 }
 /* USER CODE END 0 */
 
@@ -175,7 +175,7 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	while (1) {
-		logic(&menu_settings, &system_state, &menu_buttons);
+		event_logic(&menu_settings, &system_state, &menu_buttons);
 	}
 
     /* USER CODE END WHILE */

@@ -1,6 +1,8 @@
 #include <menu.h>
 
 void show_options();
+void current_menu_screen();
+
 volatile menu_settings_t *settings = NULL;
 volatile int settings_shown_flag = 0;
 
@@ -131,10 +133,10 @@ void handle_menu(button_id_t btn) {
         case BUTTON_NONE:
             break;
     }
-    if (!settings_shown_flag) currentMenuScreen();
+    if (!settings_shown_flag) current_menu_screen();
 }
 
-void currentMenuScreen(){
+void current_menu_screen(){
     screen_message(currentMenu->name);
 }
 

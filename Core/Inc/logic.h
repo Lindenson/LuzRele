@@ -17,6 +17,6 @@ extern void stop_relay();
 extern void stop_melody();
 extern int is_dark();
 
-void logic(volatile menu_settings_t* settings, volatile system_state_t* system_state, volatile button_state_t* buttons);
+void event_logic(volatile menu_settings_t* settings, volatile system_state_t* system_state, volatile button_state_t* buttons);
 
 #endif /* INC_LOGIC_H_ */

@@ -15,7 +15,6 @@ typedef struct {
 
 void setup_menu();
 void handle_menu(button_id_t btn);
-void currentMenuScreen();
 void main_menu();
 
 #endif /* INC_MENU_H_ */

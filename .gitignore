@@ -13,7 +13,7 @@ STM32CubeMX.log
 # Build output
 /Debug/
 /Release/
-*.elf
+//*.elf
 *.bin
 *.hex
 *.map
